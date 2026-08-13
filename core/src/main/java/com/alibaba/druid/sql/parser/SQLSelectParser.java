@@ -968,9 +968,9 @@ public class SQLSelectParser extends SQLParser {
                 accept(Token.RPAREN);
                 groupBy.setParen(true);
 
-                // 支持 GROUP BY ROLLUP(a), b / CUBE(a), b 这类分组函数后跟更多分组项的形式。
-                // ODPS 通过 RewriteGroupByCubeRollupToFunction 特性开启；标准 SQL（如 PostgreSQL）默认支持。
-                // 两种情形共用 rewriteCubeRollupToFunction 完成一致的函数式重写，避免重复逻辑漂移。
+                // 支持 GROUP BY ROLLUP(a), b / CUBE(a), b 这类分组函数后跟更多分组项的形式：
+                // wrap 形式（withRollUp/withCube + paren）无法承载 ROLLUP/CUBE 之外的额外分组项，
+                // 故统一重写为函数式分组项（SQLMethodInvokeExpr），所有方言一致处理。
                 if (lexer.token == Token.COMMA) {
                     lexer.nextToken();
                     rewriteCubeRollupToFunction(groupBy);
